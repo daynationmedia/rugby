@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Rugby Direct - FFR | TV</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Montserrat (Ultra Bold) & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        montserrat: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        rugbyBlue: '#002f6c',
+                        rugbyBlueHover: '#001f4d',
+                        rugbyLightBlue: '#0084ff',
+                        rugbyGold: '#d4af37',
+                        rugbyGoldHover: '#aa8c2c',
+                        darkBg: '#020617',
+                        darkCard: '#0f172a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Typographie d'en-tête de Rugby Direct - FFR */
+        .header-compressed-text {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+        /* Style de la barre de progression */
+        .seeker-progress {
+            width: 35%;
+        }
+    </style>
+</head>
+<body class="bg-darkBg text-white font-sans overflow-x-hidden min-h-screen pb-safe">
+
+    <!-- === 1. BANNIÈRE PRINCIPALE === -->
+    <section class="bg-gradient-to-r from-[#011627] to-[#012a4a] border-b-2 border-rugbyLightBlue py-8 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                
+                <!-- Côté gauche : Statut En Direct et Titre -->
+                <div class="flex items-center space-x-4 sm:space-x-6 text-center md:text-left">
+                    <!-- Indicateur En Direct Bleu Animé -->
+                    <div class="bg-rugbyLightBlue text-white font-montserrat font-black tracking-widest text-xs sm:text-sm px-4 py-2 rounded-md flex items-center shrink-0">
+                        <span class="w-2.5 h-2.5 bg-white rounded-full mr-2 animate-ping"></span>
+                        EN DIRECT
+                    </div>
+                    <!-- Titre Principal -->
+                    <h2 class="header-compressed-text text-2xl sm:text-3xl lg:text-4xl text-white tracking-tight leading-none uppercase">
+                        REGARDEZ LE RUGBY EN DIRECT <br class="hidden sm:inline"> RUGBY DIRECT - FFR
+                    </h2>
+                </div>
+
+                <!-- Côté droit : Boutons d'action -->
+                <div class="flex flex-col sm:flex-row md:flex-col gap-3 w-full sm:w-auto shrink-0">
+                    
+                    <!-- Bouton S'abonner -->
+                    <button onclick="bukaModal('subscribe')" class="w-full sm:w-44 text-center py-2.5 bg-rugbyLightBlue hover:bg-blue-600 text-white font-montserrat font-black text-xs uppercase tracking-wider rounded transition-all">
+                        S'abonner
+                    </button>
+                    
+                    <!-- Bouton Se connecter -->
+                    <button onclick="bukaModal('login')" class="w-full sm:w-44 text-center py-2.5 border border-white text-white font-montserrat font-black text-xs uppercase tracking-wider rounded hover:bg-white/10 transition-all">
+                        Se connecter
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- === 2. LECTEUR MULTIMÉDIA AVEC PAYWALL === -->
+    <section class="max-w-5xl mx-auto px-4 pt-8">
+        
+        <div class="w-full bg-black rounded-xl overflow-hidden border border-white/10 shadow-2xl flex flex-col">
+            
+            <!-- Écran vidéo avec format d'image fixe (16:9) -->
+            <div class="relative w-full aspect-video flex flex-col items-center justify-center p-4 sm:p-8 text-center select-none overflow-hidden bg-neutral-950">
+                
+                <div class="absolute inset-0 z-0">
+                    <!-- Image de fond Rugby -->
+                    <img src="/home/spot/Downloads/ffr.jpeg" 
+                         alt="Stade de Rugby en arrière-plan" 
+                         class="w-full h-full object-cover object-center opacity-75"
+                         onerror="this.src='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1920&auto=format&fit=crop'">
+                    <div class="absolute inset-0 bg-black/35"></div>
+                </div>
+
+                <!-- Passerelle de restriction d'accès -->
+                <div class="relative z-10 max-w-2xl flex flex-col items-center px-4">
+                    
+                    <!-- Texte principal du Paywall -->
+                    <h3 class="text-sm sm:text-xl lg:text-2xl font-bold text-gray-100 tracking-tight leading-relaxed max-w-xl">
+                        Regardez les matchs de rugby en direct, les replays, les moments forts et des documentaires de classe mondiale gratuitement. Diffusez du rugby à tout moment, n'importe où.
+                    </h3>
+                    
+                    <!-- === ÉTAT DE CHARGEMENT DU MINUTEUR === -->
+                    <div id="playerTimer" class="mt-6 sm:mt-8 flex flex-col items-center space-y-3">
+                        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-rugbyLightBlue"></div>
+                        <p class="text-xs sm:text-sm text-gray-300 font-semibold tracking-wide">
+                            Connexion au serveur Rugby Direct... Veuillez patienter <span id="countdownText" class="text-rugbyLightBlue font-bold text-sm sm:text-lg">10</span>s
+                        </p>
+                    </div>
+
+                    <!-- Bouton d'inscription (S'affiche après 10 secondes) -->
+                    <button id="registerBtn" onclick="bukaModal('register')" class="hidden mt-6 sm:mt-8 px-8 py-3.5 sm:px-10 sm:py-4 bg-rugbyLightBlue hover:bg-blue-600 text-white font-montserrat font-black tracking-wide text-xs sm:text-sm uppercase rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-rugbyLightBlue/30">
+                        CRÉER UN COMPTE GRATUIT
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- === 3. BARRE DE CONTRÔLES DU LECTEUR === -->
+            <div class="w-full bg-[#0b0f19] border-t border-white/10 px-4 py-3.5 flex flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-4 flex-grow">
+                    <button onclick="bukaModal('stream')" class="text-gray-300 hover:text-white transition-colors">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                    </button>
+                    
+                    <div onclick="bukaModal('stream')" class="flex-grow bg-gray-800 h-1.5 rounded-full relative overflow-hidden cursor-pointer">
+                        <div class="bg-rugbyLightBlue h-full rounded-full seeker-progress"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4 shrink-0">
+                    <div class="hidden sm:flex items-center space-x-2">
+                        <i data-lucide="volume-2" class="w-4 h-4 text-gray-400"></i>
+                        <div class="w-16 bg-gray-800 h-1 rounded-full overflow-hidden">
+                            <div class="bg-white h-full w-4/5"></div>
+                        </div>
+                    </div>
+                    <button onclick="bukaModal('stream')" class="text-gray-400 hover:text-white transition-colors">
+                        <i data-lucide="maximize" class="w-4 h-4"></i>
+                    </button>
+                    <div class="flex items-center text-[10px] font-bold text-rugbyLightBlue uppercase tracking-widest bg-rugbyLightBlue/10 px-2 py-0.5 rounded border border-rugbyLightBlue/20">
+                        <span class="w-1.5 h-1.5 bg-rugbyLightBlue rounded-full mr-1.5 animate-pulse"></span>
+                        FLUX EN DIRECT
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bannière sous le lecteur -->
+        <button onclick="bukaModal('watch')" class="w-full bg-rugbyLightBlue hover:bg-blue-600 transition-colors py-3.5 flex items-center justify-center rounded-b-xl cursor-pointer shadow-lg shadow-rugbyLightBlue/10 border-b border-x border-white/10 relative z-20">
+            <span class="font-montserrat font-black text-[10px] sm:text-xs text-white tracking-widest uppercase text-center px-4">COMMENCER LA DIFFUSION EN DIRECT EN ULTRA HD GRATUITEMENT</span>
+        </button>
+    </section>
+
+    <!-- === 4. ZONE DE PUBLICITÉ ADSTERRA === -->
+    <section class="max-w-4xl mx-auto px-4 mt-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="w-full flex flex-col items-center justify-center min-h-[50px]">
+                <div class="text-[9px] text-gray-600 tracking-widest uppercase border border-dashed border-white/10 px-6 py-4 rounded-xl w-full text-center">
+                    [ Espace Publicitaire 1 - Adsterra ]
+                </div>
+            </div>
+            <div class="w-full flex flex-col items-center justify-center min-h-[50px]">
+                <div class="text-[9px] text-gray-600 tracking-widest uppercase border border-dashed border-white/10 px-6 py-4 rounded-xl w-full text-center">
+                    [ Espace Publicitaire 2 - Adsterra ]
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- === 5. SPÉCIFICATIONS ET QUALITÉ DU RÉSEAU === -->
+    <section class="max-w-5xl mx-auto px-4 py-12">
+        <div class="bg-darkCard border border-white/5 rounded-2xl p-6 sm:p-8">
+            <h3 class="text-center font-montserrat font-black text-lg sm:text-xl tracking-wider text-white uppercase mb-2">
+                UNE EXPÉRIENCE DE STREAMING EXCEPTIONNELLE
+            </h3>
+            <p class="text-center text-xs sm:text-sm text-gray-400 mb-8 max-w-2xl mx-auto">
+                Découvrez pourquoi des millions de fans choisissent notre réseau pour diffuser chaque jour les événements majeurs de rugby.
+            </p>
+
+            <!-- Grille des caractéristiques clés -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Qualité Ultra HD -->
+                <div class="bg-black/40 border border-white/5 p-5 rounded-xl flex flex-col items-center text-center transition-all hover:border-rugbyLightBlue/30">
+                    <div class="w-12 h-12 bg-rugbyLightBlue/10 text-rugbyLightBlue rounded-full flex items-center justify-center mb-4 border border-rugbyLightBlue/20">
+                        <i data-lucide="tv-2" class="w-6 h-6"></i>
+                    </div>
+                    <h4 class="text-sm font-bold uppercase tracking-wide text-white mb-2">Qualité Ultra HD</h4>
+                    <p class="text-[11px] sm:text-xs text-gray-400 leading-relaxed">
+                        Profitez d'une résolution 4K et Full HD nette avec un son de stade spatial immersif.
+                    </p>
+                </div>
+
+                <!-- Réseau stable et faible latence -->
+                <div class="bg-black/40 border border-white/5 p-5 rounded-xl flex flex-col items-center text-center transition-all hover:border-rugbyLightBlue/30">
+                    <div class="w-12 h-12 bg-rugbyLightBlue/10 text-rugbyLightBlue rounded-full flex items-center justify-center mb-4 border border-rugbyLightBlue/20">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </div>
+                    <h4 class="text-sm font-bold uppercase tracking-wide text-white mb-2">Stabilité du Réseau</h4>
+                    <p class="text-[11px] sm:text-xs text-gray-400 leading-relaxed">
+                        Soutenu par des nœuds CDN mondiaux pour éliminer les interruptions et maintenir une latence inférieure à 2s.
+                    </p>
+                </div>
+
+                <!-- Accès facile en un clic -->
+                <div class="bg-black/40 border border-white/5 p-5 rounded-xl flex flex-col items-center text-center transition-all hover:border-rugbyLightBlue/30">
+                    <div class="w-12 h-12 bg-rugbyLightBlue/10 text-rugbyLightBlue rounded-full flex items-center justify-center mb-4 border border-rugbyLightBlue/20">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <h4 class="text-sm font-bold uppercase tracking-wide text-white mb-2">Accès Facile</h4>
+                    <p class="text-[11px] sm:text-xs text-gray-400 leading-relaxed">
+                        Pas de cartes de crédit ni d'abonnements complexes. Authentification rapide et sécurisée pour débloquer les flux.
+                    </p>
+                </div>
+
+                <!-- Prise en charge multi-appareils -->
+                <div class="bg-black/40 border border-white/5 p-5 rounded-xl flex flex-col items-center text-center transition-all hover:border-rugbyLightBlue/30">
+                    <div class="w-12 h-12 bg-rugbyLightBlue/10 text-rugbyLightBlue rounded-full flex items-center justify-center mb-4 border border-rugbyLightBlue/20">
+                        <i data-lucide="smartphone" class="w-6 h-6"></i>
+                    </div>
+                    <h4 class="text-sm font-bold uppercase tracking-wide text-white mb-2">Multiplateforme</h4>
+                    <p class="text-[11px] sm:text-xs text-gray-400 leading-relaxed">
+                        Diffusez de manière fluide sur votre iPhone, Android, tablette, Smart TV ou navigateurs Web d'ordinateurs.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- === 6. ZONE DE PROMOTION RESPONSIVE === -->
+    <section class="max-w-5xl mx-auto px-4 pb-16">
+        <div class="w-full bg-darkCard border border-white/5 rounded-2xl overflow-hidden shadow-xl p-4 sm:p-6 text-center">
+            <h3 class="font-montserrat font-black text-sm sm:text-md tracking-wider text-gray-400 uppercase mb-4">
+                Couverture Exclusive Rugby Direct
+            </h3>
+            
+            <div class="relative w-full overflow-hidden rounded-xl border border-white/10 group bg-slate-950">
+                <img src="/home/spot/Downloads/rug.jpg" 
+                     alt="Championnat du monde de Rugby" 
+                     class="w-full h-auto max-h-[350px] object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
+                     onerror="this.src='https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1200&auto=format&fit=crop'">
+                <!-- Voile dégradé sur l'image -->
+                <div class="absolute inset-0 bg-gradient-to-t from-darkBg via-transparent to-transparent opacity-60"></div>
+            </div>
+            
+            <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-left px-2">
+                <div>
+                    <h4 class="text-md font-bold text-white uppercase tracking-tight">Diffusez toutes les coupes continentales majeures et documentaires</h4>
+                    <p class="text-xs text-gray-400">Disponible mondialement sur demande avec plusieurs options de commentaires linguistiques.</p>
+                </div>
+                <button onclick="bukaModal('subscribe')" class="px-6 py-2.5 bg-rugbyLightBlue hover:bg-blue-600 text-white font-montserrat font-black rounded-lg transition-all text-xs tracking-wider uppercase whitespace-nowrap">
+                    Rejoindre Rugby Direct
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#030712] border-t border-white/5 py-12 pb-safe-bottom">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-xs text-gray-500">&copy; 2026 Réseau de diffusion Rugby Direct - FFR. Tous droits réservés. Les marques déposées sont protégées par la loi.</p>
+        </div>
+    </footer>
+
+    <!-- === 7. BADGE SPECTATEURS EN LIGNE (TEMPS RÉEL) === -->
+    <div class="fixed bottom-4 right-4 z-50 bg-black/95 border border-white/10 px-4 py-2.5 rounded-lg shadow-2xl flex items-center space-x-2 select-none">
+        <span class="relative flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+        </span>
+        <span class="text-[10px] sm:text-xs font-bold text-gray-200">
+            <span id="userCount">14258</span> Utilisateurs en ligne
+        </span>
+    </div>
+
+    <!-- === POPUP MODAL INTERACTIF PREMIUM === -->
+    <div id="ctaModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md hidden">
+        <div class="bg-darkCard border border-white/10 p-6 sm:p-8 rounded-2xl max-w-md w-full relative shadow-2xl">
+            <!-- Bouton de fermeture -->
+            <button onclick="tutupModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            
+            <div class="text-center">
+                <!-- Conteneur d'icône dynamique -->
+                <div id="modalIconContainer" class="w-16 h-16 bg-rugbyLightBlue/10 text-rugbyLightBlue rounded-full flex items-center justify-center mx-auto mb-4 border border-rugbyLightBlue/20">
+                    <i data-lucide="tv" class="w-8 h-8"></i>
+                </div>
+                <h3 id="modalTitle" class="text-xl sm:text-2xl font-montserrat font-black uppercase tracking-tight mb-2 text-white"></h3>
+                <p id="modalBody" class="text-gray-400 text-sm mb-6 leading-relaxed"></p>
+
+                <!-- Formulaire d'inscription -->
+                <form onsubmit="kirimForm(event)" class="space-y-4">
+                    <input type="email" id="userEmail" placeholder="Entrez votre adresse e-mail" class="w-full px-4 py-3 bg-black border border-white/10 rounded-xl focus:outline-none focus:border-rugbyLightBlue text-white text-sm" required>
+                    <button type="submit" class="w-full py-3.5 bg-rugbyLightBlue hover:bg-blue-600 text-white font-montserrat font-black rounded-xl transition-all uppercase tracking-wider text-xs sm:text-sm">
+                        CONTINUER
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION DE TOAST ÉLÉGANTE -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-darkCard border-l-4 border-hsGreen text-white px-5 py-4 rounded-xl shadow-2xl transition-all duration-300 transform translate-y-24 opacity-0 z-50 flex items-center space-x-3 border border-white/5">
+        <i data-lucide="check-circle" class="w-6 h-6 text-hsGreen"></i>
+        <div>
+            <p class="font-bold text-sm">Accès Autorisé !</p>
+            <p id="toastMsg" class="text-xs text-gray-400"></p>
+        </div>
+    </div>
+
+    <!-- SCRIPTS DE CONTRÔLE PRINCIPAUX -->
+    <script>
+        // Charger les icônes Lucide
+        lucide.createIcons();
+
+        // === [DÉFINISSEZ VOTRE DIRECT LINK ADSTERRA ICI] ===
+        const directLink = "https://omg10.com/4/10945293";
+
+        // Éléments du DOM
+        const modal = document.getElementById('ctaModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalIconContainer = document.getElementById('modalIconContainer');
+
+        function bukaModal(tipe, subTipe = '') {
+            // Modification dynamique du texte des modaux en français
+            if (tipe === 'login') {
+                modalTitle.innerText = "CONNEXION AU COMPTE";
+                modalBody.innerText = "Veuillez saisir votre adresse e-mail enregistrée pour compléter votre authentification de streaming en direct Rugby Direct.";
+                modalIconContainer.innerHTML = '<i data-lucide="log-in" class="w-8 h-8 text-rugbyLightBlue"></i>';
+            } else if (tipe === 'subscribe') {
+                modalTitle.innerText = "S'ABONNER GRATUITEMENT";
+                modalBody.innerText = "Profitez d'une couverture illimitée de rugby, de documentaires et de moments forts. Confirmez votre e-mail pour commencer la diffusion.";
+                modalIconContainer.innerHTML = '<i data-lucide="sparkles" class="w-8 h-8 text-rugbyGold"></i>';
+            } else if (tipe === 'register') {
+                modalTitle.innerText = "CRÉER UN COMPTE GRATUIT";
+                modalBody.innerText = "Enregistrez votre adresse e-mail pour établir une synchronisation vidéo sécurisée et contourner les restrictions.";
+                modalIconContainer.innerHTML = '<i data-lucide="user-plus" class="w-8 h-8 text-hsGreen"></i>';
+            } else if (tipe === 'watch') {
+                modalTitle.innerText = "COMMENCER LE STREAMING";
+                modalBody.innerText = "Confirmez votre e-mail pour accéder immédiatement à la passerelle de streaming des coupes continentales et des matchs du jour.";
+                modalIconContainer.innerHTML = '<i data-lucide="play-circle" class="w-8 h-8 text-rugbyLightBlue"></i>';
+            } else if (tipe === 'stream') {
+                modalTitle.innerText = "ACTIVER LE LECTEUR MULTIMÉDIA";
+                modalBody.innerText = "Vérifiez votre adresse e-mail pour activer le lecteur multimédia principal et charger le flux de rugby en direct.";
+                modalIconContainer.innerHTML = '<i data-lucide="video" class="w-8 h-8 text-rugbyLightBlue"></i>';
+            } else if (tipe === 'sport') {
+                modalTitle.innerText = `${subTipe.toUpperCase()} EN DIRECT`;
+                modalBody.innerText = `La diffusion en direct premium pour ${subTipe} est actuellement en cours de mise en mémoire tampon. Veuillez vérifier votre e-mail pour continuer.`;
+                modalIconContainer.innerHTML = '<i data-lucide="activity" class="w-8 h-8 text-rugbyLightBlue"></i>';
+            }
+
+            // Réinjecter les icônes chargées dynamiquement
+            lucide.createIcons();
+
+            // Ouvrir le modal
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function tutupModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('userEmail').value = ''; // Réinitialiser le champ e-mail
+        }
+
+        function kirimForm(event) {
+            event.preventDefault(); // Empêcher le rafraîchissement par défaut
+
+            const emailInput = document.getElementById('userEmail');
+            if (!emailInput.value) return;
+
+            // 1. Ouvrir le direct link dans une nouvelle fenêtre/onglet.
+            // Puisque l'action est déclenchée par un clic direct de l'utilisateur, les navigateurs autorisent le popup.
+            const adTab = window.open(directLink, '_blank');
+            
+            // 2. Ramener discrètement le focus sur notre onglet d'origine
+            if (adTab) {
+                window.focus();
+            }
+
+            // 3. Fermer le modal
+            tutupModal();
+
+            // 4. Déclencher la notification de toast premium
+            tampilkanToast("Authentification réussie ! Chargement de votre flux de rugby en direct.");
+        }
+
+        function tampilkanToast(pesan) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = pesan;
+            
+            // Glisser/Afficher
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            
+            // Masquer automatiquement après 4 secondes
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 4000);
+        }
+
+        // === MINUTEUR SHIELD DE 10 SECONDES POUR LE BOUTON REGISTRER ===
+        let timeLeft = 10;
+        const countdownText = document.getElementById('countdownText');
+        const playerTimer = document.getElementById('playerTimer');
+        const registerBtn = document.getElementById('registerBtn');
+
+        const countdownInterval = setInterval(() => {
+            timeLeft--;
+            if (countdownText) {
+                countdownText.innerText = timeLeft;
+            }
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                if (playerTimer) playerTimer.classList.add('hidden'); // Masquer le chargement
+                if (registerBtn) registerBtn.classList.remove('hidden'); // Afficher le bouton
+            }
+        }, 1000);
+
+        // Simulation dynamique du nombre d'utilisateurs en ligne
+        setInterval(() => {
+            const countSpan = document.getElementById('userCount');
+            let currentCount = parseInt(countSpan.innerText);
+            const change = Math.floor(Math.random() * 11) - 5; // Variation de -5 à +5
+            countSpan.innerText = currentCount + change;
+        }, 3000);
+    </script>
+    
+    <!-- Histats.com  (div with counter) -->
+    <div id="histats_counter"></div>
+    <!-- Histats.com  START  (aync)-->
+    <script type="text/javascript">
+        var _Hasync= _Hasync|| [];
+        _Hasync.push(['Histats.start', '1,5023630,4,22,130,30,00011111']);
+        _Hasync.push(['Histats.fasi', '1']);
+        _Hasync.push(['Histats.track_hits', '']);
+        (function() {
+        var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+        hs.src = ('//s10.histats.com/js15_as.js');
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+        })();
+    </script>
+    <noscript><a href="/" target="_blank"><img src="//sstatic1.histats.com/0.gif?5023630&101" alt="" border="0"></a></noscript>
+    <!-- Histats.com  END  -->
+</body>
+</html>
